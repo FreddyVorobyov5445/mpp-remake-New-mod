@@ -69,3 +69,5 @@ function stopSound(key, isSustained=false) {
 
     currentlyPlaying.splice(currentlyPlaying.indexOf(key), 1)
 }
+
+export {playSound, stopSound, keys, audioArr,audioCtx,currentlyPlaying}

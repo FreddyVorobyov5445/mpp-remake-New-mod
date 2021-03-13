@@ -13,13 +13,14 @@ ws.onmessage = function({data}) {
 		break;
 
 		case "sustainSwitch":
-			audioArr.forEach(sound => {stopSound(sound, json.sustain)})
+			keys.forEach(key => {stopSound(key, json.sustain)})
 		break;
 	}
 }
 
 
 
+import {playSound, stopSound, keys} from './sound.js'
 
 WebMidi.enable(function (err) {
     if (err) 
