@@ -13,6 +13,7 @@ audioArr = {},
 audioCtx = {},
 currentlyPlaying = []
 
+console.group(`Loaded ${keys.length} Keys`)
 keys.forEach(key => {
     audioArr[key] = [
         new Audio(`../sounds/Default Piano/`+key+`.ogg`), 
@@ -25,6 +26,8 @@ keys.forEach(key => {
         audioArr[key][1].createGain()
     ]
 })
+console.table(audioArr)
+console.groupEnd()
 
 /**
  * Play a key.
