@@ -21,8 +21,6 @@ ws.onmessage = function({data}) {
 
 
 
-import {playSound, stopSound, audioArr} from "./sound.js"
-
 WebMidi.enable(function (err) {
     if (err) 
       throw new Error("Midi could not enabled!")

@@ -16,11 +16,11 @@ currentlyPlaying = []
 console.group(`Loaded ${keys.length} Keys`)
 keys.forEach(key => {
     audioArr[key] = [
-        new Audio(`../sounds/Default Piano/`+key+`.ogg`), 
+        new Audio(`./sounds/Default Piano/${key}.ogg`), 
         new AudioContext()
     ]
-    audioArr[key].type = "audio/ogg"
-
+    audioArr[key][0].type = "audio/ogg"
+    console.log( audioArr[key][0].canPlayType("audio/ogg"))
     audioCtx[key] = [
         audioArr[key][1].createMediaElementSource(audioArr[key][0]),
         audioArr[key][1].createGain()
@@ -43,8 +43,6 @@ function playSound(key, velocity) {
         gainNode = audioCtx[key][1]
 
 
-    console.log(keyAudio.readyState)
-
     keyAudio.src = keyAudio.src
     gainNode.gain.setTargetAtTime(keyAudio.volume, Ctx.currentTime, 0.01)
 
@@ -54,7 +52,6 @@ function playSound(key, velocity) {
     $(keyAudio).prop("volume", velocity)
     keyAudio.play()
     currentlyPlaying.push(key)
-
     console.log(currentlyPlaying);
 }
 
@@ -72,5 +69,3 @@ function stopSound(key, isSustained=false) {
 
     currentlyPlaying.splice(currentlyPlaying.indexOf(key), 1)
 }
-
-export {stopSound, playSound, currentlyPlaying, audioArr, audioCtx, keys}
