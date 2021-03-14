@@ -6,7 +6,7 @@
 */
 const Client = {}
 
-Client.ws = new WebSocket("ws://188.103.32.175:3232")
+Client.ws = new WebSocket("ws://localhost:3232")
 Client.inputs = []
 Client.sustain = false
 
