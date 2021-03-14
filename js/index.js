@@ -19,7 +19,7 @@ import {Sound} from './sound.js';
 
 
 WebMidi.enable(function(err) {
-    if (err) throw new Error("Midi could not enabled!")
+    if (err) throw new Error("Midi could not be enabled!")
 
     WebMidi.inputs.forEach(input=>{Client.inputs.push(input)});
 
@@ -47,10 +47,12 @@ WebMidi.enable(function(err) {
 			if(e.data[0] === 191 && e.data[1] === 64) {
 				const res = Client.sustain = (e.data[2] === 127) ? true : false
 
-				ws.send(JSON.stringify({
+				Client.ws.send(JSON.stringify({
 					type:"sustainSwitch",
 					sustain: res
 				}))
+
+				Sound.onSustainChange(Client.sustain);
 			}
 		})
 

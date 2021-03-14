@@ -26,6 +26,7 @@ Sound.init = function() {
             this.audioCtx.createGain()
         )
         this.audioArr[key][0].type = "audio/ogg"
+        this.audioArr[key][2].gain.value=0
     })
 
     console.table(this.audioArr)
@@ -48,16 +49,16 @@ Sound.playSound = function(key, velocity) {
 
 
     keyAudio.src = keyAudio.src
-    gainNode.gain.setTargetAtTime(keyAudio.volume, this.audioCtx.currentTime, 0.01)
+    gainNode.gain.setTargetAtTime(keyAudio.volume, this.audioCtx.currentTime, 0.005)
 
     this.audioArr[key][1].connect(gainNode)
     gainNode.connect(this.audioCtx.destination)
 
     $(keyAudio).prop("volume", velocity)
     keyAudio.play()
-    this.currentlyPlaying.push(key)
+    Sound.currentlyPlaying.push(key)
 
-    console.log(this.currentlyPlaying);
+    console.log(Sound.currentlyPlaying);
 }
 
 /**
@@ -69,9 +70,22 @@ Sound.playSound = function(key, velocity) {
 Sound.stopSound = function(key, isSustained=false) {
     if(!isSustained) this.audioArr[key][2].gain.setTargetAtTime(0, this.audioCtx.currentTime, 0.05)
 
-    this.currentlyPlaying.splice(this.currentlyPlaying.indexOf(key), 1)
+    Sound.currentlyPlaying.splice(Sound.currentlyPlaying.indexOf(key), 1)
 }
 
+/**
+ * Trigger this if sustain state changed.
+ * 
+ * @param {Boolean} sustain 
+ */
+Sound.onSustainChange = function(sustain=false) {
+    if(!sustain) {
+        this.keys.forEach(key=>{
+            if(this.currentlyPlaying.indexOf(key) === -1 && this.audioArr[key][2].gain.value !== 0)
+                this.stopSound(key);
+        })
+    }
+}
 
 /*
  * ==================================

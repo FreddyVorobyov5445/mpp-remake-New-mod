@@ -31,7 +31,7 @@ Server.server.on('connection',conn=>{
 
         switch(json.type) {
             // Send a note to the others
-            case "noteOn":
+            case "noteon":
                 server.clients.forEach(client => {
                     if(client !== conn) 
                         client.send(JSON.stringify({
@@ -39,12 +39,12 @@ Server.server.on('connection',conn=>{
                             note:json.note, velocity:json.velocity, sustain:conn.sustain||false
                         }))
                 })
-                
+
                 Server.log("Client", `Send pressing ${json.note}`)
             break;
 
             // Stop a note
-            case "noteOff":
+            case "noteoff":
                 server.clients.forEach(client => {
                     if(client !== conn) 
                         client.send(JSON.stringify({
@@ -66,6 +66,9 @@ Server.server.on('connection',conn=>{
                 })
 
                 Server.log("Client", `Send changing state of sustain to ${conn.sustain}`)
+            break;
+            default:
+                Server.log("Client", `Tried to send: ${json.type}`)
             break;
         }
     })
