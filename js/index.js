@@ -1,68 +1,76 @@
-const ws = new WebSocket("ws://94.222.34.208:3232");
-ws.onmessage = function({data}) {
+/*
+ * ==================================
+ * Index.js
+ * Client and websocket handling.
+ * ==================================
+*/
+const Client = {}
+
+Client.ws = new WebSocket("ws://188.106.254.176:3232")
+Client.inputs = []
+Client.sustain = false
+
+/*
+ * ==================================
+ * Import separate Files
+ * ==================================
+*/
+import {Sound} from './sound.js'; Sound.init();
+
+
+/**
+ * ==================================
+ * Receive a websocket message
+ * ==================================
+*/
+Client.ws.onmessage = function({data}) {
 	var json = JSON.parse(data);
 
 	switch(json.type) {
+		case "noteOn": Sound.playSound(json.note,json.velocity); break;
 
-		case "noteOn":
-			playSound(json.note,json.velocity)
-		break;
+		case "noteOff": Sound.stopSound(json.note, json.sustain); break;
 
-		case "noteOff":
-			stopSound(json.note, json.sustain)
-		break;
-
-		case "sustainSwitch":
-			keys.forEach(key => {stopSound(key, json.sustain)})
-		break;
+		case "sustainSwitch": Sound.keys.forEach(function(key) {this.stopSound(key, json.sustain)}); break;
 	}
 }
 
+WebMidi.enable(function(err) {
+    if (err) throw new Error("Midi could not enabled!")
 
+    WebMidi.inputs.forEach(input => {Client.inputs.push(input)});
 
-import {playSound, stopSound, keys} from './sound.js'
+	Client.inputs.forEach(function(input) {
 
-WebMidi.enable(function (err) {
-    if (err) 
-      throw new Error("Midi could not enabled!")
-    
-	var inputs = [],
-		sustain = false
-
-    WebMidi.inputs.forEach(input => {
-		inputs.push(input);
-	});
-	inputs.forEach(input => {
-
-		input.addListener("noteon", "all", function(e) {
-			console.log(e)
-			ws.send(JSON.stringify({
+		input.addListener("noteon", "all", e => {
+			Client.ws.send(JSON.stringify({
 				type:"noteon",
 				note:(e.note.name+e.note.octave).replace("#", "s"),
 				velocity:e.velocity
 			}))
 
-			playSound((e.note.name+e.note.octave).replace("#", "s"),e.velocity)
+			Sound.playSound((e.note.name+e.note.octave).replace("#", "s"), e.velocity)
 		})
-		input.addListener("noteoff", "all", function(e) {
-			console.log(e)
-			ws.send(JSON.stringify({
+		input.addListener("noteoff", "all", e => {
+			Client.ws.send(JSON.stringify({
 				type:"noteoff",
 				note:(e.note.name+e.note.octave).replace("#", "s"),
 				velocity:e.velocity
 			}))
 
-			stopSound((e.note.name+e.note.octave).replace("#", "s"), sustain)
+			Sound.stopSound((e.note.name+e.note.octave).replace("#", "s"), Client.sustain)
 		})
-
-		input.addListener("midimessage", "all", function(e) {
+		input.addListener("midimessage", "all", e => {
 			if(e.data[0] === 191 && e.data[1] === 64) {
+				const res = Client.sustain = (e.data[2] === 127) ? true : false
+
 				ws.send(JSON.stringify({
 					type:"sustainSwitch",
-					sustain:(e.data[2] === 127) ? true : false
+					sustain: res
 				}))
-				sustain = (e.data[2] === 127) ? true : false
 			}
 		})
+
 	})
+
 });
