@@ -17,47 +17,46 @@ Client.sustain = false
 */
 import {Sound} from './sound.js';
 
-
 WebMidi.enable(function(err) {
     if (err) throw new Error("Midi could not be enabled!")
 
-    WebMidi.inputs.forEach(input=>{Client.inputs.push(input)});
+    WebMidi.inputs.forEach(input=>{
+		Client.inputs.push(input)
+	});
 
 	Client.inputs.forEach(function(input) {
 
+		
 		input.addListener("noteon", "all", e=>{
 			Client.ws.send(JSON.stringify({
 				type:"noteon",
-				note:(e.note.name+e.note.octave).replace("#", "s"),
+				note:e.note,
 				velocity:e.velocity
 			}))
-
-			Sound.playSound((e.note.name+e.note.octave).replace("#", "s"), e.velocity)
+			Sound.playSound(e.note, e.velocity);
 		})
 		input.addListener("noteoff", "all", e=>{
 			Client.ws.send(JSON.stringify({
 				type:"noteoff",
-				note:(e.note.name+e.note.octave).replace("#", "s"),
+				note:e.note,
 				velocity:e.velocity
 			}))
 
-			Sound.stopSound((e.note.name+e.note.octave).replace("#", "s"), Client.sustain)
+			Sound.stopSound(e.note, Client.sustain)
 		})
 		input.addListener("midimessage", "all", e=>{
-			if(e.data[0] === 191 && e.data[1] === 64) {
-				const res = Client.sustain = (e.data[2] === 127) ? true : false
+			if(!(e.data[0] === 191 && e.data[1] === 64)) return;
 
-				Client.ws.send(JSON.stringify({
-					type:"sustainSwitch",
-					sustain: res
-				}))
+			const res = Client.sustain = (e.data[2] === 127) ? true : false
 
-				Sound.onSustainChange(Client.sustain);
-			}
+			Client.ws.send(JSON.stringify({
+				type:"sustainSwitch",
+				sustain: res
+			}))
+
+			Sound.onSustainChange(Client.sustain);
 		})
-
 	})
-
 });
 
 
@@ -68,12 +67,20 @@ WebMidi.enable(function(err) {
 */
 Client.ws.onmessage = function({data}) {
 	var json = JSON.parse(data);
-
+	console.log(json);
 	switch(json.type) {
-		case "noteOn": Sound.playSound(json.note,json.velocity); break;
+		case "noteon": 
+			Sound.playSound(json.note,json.velocity);
+			break;
 
-		case "noteOff": Sound.stopSound(json.note, json.sustain); break;
+		case "noteoff":
+			Sound.stopSound(json.note, json.sustain);
+			break;
 
-		case "sustainSwitch": Sound.keys.forEach(function(key) {this.stopSound(key, json.sustain)}); break;
+		case "sustainSwitch":
+			Sound.keys.forEach(function(key) {
+				this.stopSound(key, json.sustain)
+			});
+			break;
 	}
 }

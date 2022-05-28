@@ -16,7 +16,6 @@ const server = Server.server = new ws.Server({port:3232})
  * ==================================
  */
 Server.server.on('connection',conn=>{
-    // Printing that a Client connected.
     Server.log("Server", "Client connected!")
 
 
@@ -25,19 +24,23 @@ Server.server.on('connection',conn=>{
      * We receive a message from the Client.
      * ==================================
      */
-    conn.on("message", (data) => {
+    conn.on("message", data => {
         var json = JSON.parse(data)
         Server.clients = server.clients
 
         switch(json.type) {
+            
             // Send a note to the others
             case "noteon":
                 server.clients.forEach(client => {
-                    if(client !== conn) 
-                        client.send(JSON.stringify({
-                            type: json.type,
-                            note:json.note, velocity:json.velocity, sustain:conn.sustain||false
-                        }))
+                    if(client == conn) return;
+
+                    client.send(JSON.stringify({
+                        type: json.type,
+                        note:json.note, 
+                        velocity:json.velocity, 
+                        sustain:conn.sustain||false
+                    }))
                 })
 
                 Server.log("Client", `Send pressing ${json.note}`)
@@ -46,11 +49,14 @@ Server.server.on('connection',conn=>{
             // Stop a note
             case "noteoff":
                 server.clients.forEach(client => {
-                    if(client !== conn) 
-                        client.send(JSON.stringify({
-                            type: json.type,
-                            note:json.note, velocity:json.velocity, sustain:conn.sustain||false
-                        }))
+                    if(client == conn) return;
+
+                    client.send(JSON.stringify({
+                        type: json.type,
+                        note:json.note, 
+                        velocity:json.velocity, 
+                        sustain:conn.sustain||false
+                    }))
                 })
 
                 Server.log("Client", `Send releasing ${json.note}`)
@@ -61,8 +67,12 @@ Server.server.on('connection',conn=>{
                 conn.sustain = json.sustain
 
                 server.clients.forEach(client => {
-                    if(client !== conn) 
-                        client.send(JSON.stringify({type: json.type,sustain:conn.sustain}))
+                    if(client == conn) return;
+
+                    client.send(JSON.stringify({
+                        type: json.type,
+                        sustain:conn.sustain
+                    }))
                 })
 
                 Server.log("Client", `Send changing state of sustain to ${conn.sustain}`)

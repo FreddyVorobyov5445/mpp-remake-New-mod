@@ -42,6 +42,8 @@ Sound.init = function() {
  * @param {Number} velocity 
  */
 Sound.playSound = function(key, velocity) {
+    key = (key.name+key.octave).replace("#", "s")
+    console.log(key);
     this.audioCtx.resume()
 
     var keyAudio = this.audioArr[key][0],
@@ -68,6 +70,7 @@ Sound.playSound = function(key, velocity) {
  * @param {Boolean} isSustained
  */
 Sound.stopSound = function(key, isSustained=false) {
+    key = (key.name+key.octave).replace("#", "s")
     if(!isSustained) this.audioArr[key][2].gain.setTargetAtTime(0, this.audioCtx.currentTime, 0.05)
 
     Sound.currentlyPlaying.splice(Sound.currentlyPlaying.indexOf(key), 1)
