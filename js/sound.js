@@ -48,8 +48,8 @@ Sound.playSound = function(key, velocity) {
         gainNode = this.audioArr[key][2]
 
 
-    keyAudio.src = keyAudio.src
-    gainNode.gain.setTargetAtTime(keyAudio.volume, this.audioCtx.currentTime, 0.005)
+    keyAudio.currentTime = 0;
+    gainNode.gain.setTargetAtTime(keyAudio.volume, this.audioCtx.currentTime, 0.01)
 
     this.audioArr[key][1].connect(gainNode)
     gainNode.connect(this.audioCtx.destination)
@@ -58,7 +58,7 @@ Sound.playSound = function(key, velocity) {
     keyAudio.play()
     Sound.currentlyPlaying.push(key)
 
-    console.log(Sound.currentlyPlaying);
+    Sound.Debug()
 }
 
 /**
@@ -71,6 +71,7 @@ Sound.stopSound = function(key, isSustained=false) {
     if(!isSustained) this.audioArr[key][2].gain.setTargetAtTime(0, this.audioCtx.currentTime, 0.05)
 
     Sound.currentlyPlaying.splice(Sound.currentlyPlaying.indexOf(key), 1)
+    Sound.Debug()
 }
 
 /**
@@ -85,6 +86,12 @@ Sound.onSustainChange = function(sustain=false) {
                 this.stopSound(key);
         })
     }
+}
+
+Sound.Debug = function() {
+    document.open();
+    document.writeln(`<br>Currently Playing: ${Sound.currentlyPlaying}`);
+    console.log(Sound.currentlyPlaying);
 }
 
 /*
