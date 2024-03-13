@@ -1,15 +1,15 @@
 {
   "name": "server",
-  "version": "1.0.0",
+  "version": "9.7.0",
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 99",
     "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ws": "^7.4.4"
+    "ws": "^9.7.0"
   }
 }
