@@ -6,7 +6,7 @@
  */
 const Server = {}
 const ws = Server.ws = require("ws")
-const server = Server.server = new ws.Server({port:3232})
+const server = Server.server = new ws.Server({port:3333})
 
 
 
